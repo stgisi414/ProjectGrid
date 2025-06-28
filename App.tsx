@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { ProjectDetails, GeneratedAsset, AssetType, User } from './types';
@@ -26,7 +25,7 @@ const App: React.FC = () => {
   const [colorTheme, setColorTheme] = useState<string>('#4A90E2');
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  
+
   const isSignedIn = !!accessToken;
 
   const resetStateForNewProject = () => {
@@ -46,7 +45,7 @@ const App: React.FC = () => {
     setUser(null);
     resetStateForNewProject();
   }, [accessToken]);
-  
+
   useEffect(() => {
     // Only attempt to initialize the Google Sign-In client if it's configured.
     if (GoogleAuth.isAuthAvailable) {
