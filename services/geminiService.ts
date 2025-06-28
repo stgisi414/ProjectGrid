@@ -2,15 +2,20 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { ProjectDetails } from '../types';
 
-if (!process.env.GEMINI_API_KEY) {
-  // In a real app, you'd want to handle this more gracefully.
-  // For this context, we will throw an error to make it clear.
-  throw new Error("GEMINI_API_KEY environment variable not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const apiKey = process.env.GEMINI_API_KEY;
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 export const generateProjectDetails = async (description: string): Promise<ProjectDetails> => {
+  if (!ai) {
+    // Provide a fallback object when API key is not set
+    return {
+      projectName: "My New Project",
+      projectObjective: "To complete all project goals on time.",
+      colorTheme: "#4A90E2",
+      kickoffMeetingTitle: "Project Kick-off"
+    };
+  }
+
   const prompt = `
     You are a project management assistant. Based on the following project description, extract key details.
     Provide your response as a single, minified JSON object with no markdown.
@@ -61,6 +66,10 @@ export const generateProjectDetails = async (description: string): Promise<Proje
 };
 
 export const generateLogo = async (projectName: string, projectObjective: string): Promise<string> => {
+    if (!ai) {
+        throw new Error("GEMINI_API_KEY environment variable not set. Please set it up to generate logos.");
+    }
+
     const prompt = `A minimalist, modern, abstract logo for a company called "${projectName}". The logo should visually represent the concept of "${projectObjective}". It should be simple, iconic, and work well in a square format. Use a vibrant color palette.`;
 
     try {
