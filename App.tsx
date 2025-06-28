@@ -157,7 +157,7 @@ const App: React.FC = () => {
               </button>
             </div>
           )}
-          <img src="/project_grid_logo.png" alt="Project Grid Logo" className="w-20 h-20 mx-auto mb-4 rounded-full" />
+          <img src="./project_grid_logo.png" alt="Project Grid Logo" className="w-20 h-20 mx-auto mb-4 rounded-full" />
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
             Project Grid
           </h1>
