@@ -2,13 +2,13 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { ProjectDetails } from '../types';
 
-if (!process.env.API_KEY) {
+if (!process.env.GEMINI_API_KEY) {
   // In a real app, you'd want to handle this more gracefully.
   // For this context, we will throw an error to make it clear.
-  throw new Error("API_KEY environment variable not set.");
+  throw new Error("GEMINI_API_KEY environment variable not set.");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export const generateProjectDetails = async (description: string): Promise<ProjectDetails> => {
   const prompt = `
