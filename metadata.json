@@ -1,0 +1,6 @@
+{
+  "name": "Project Grid",
+  "description": "An application that takes a user's description of a project, startup, or task and automatically generates a structured and branded set of documents and resources within a new Google Drive folder.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
