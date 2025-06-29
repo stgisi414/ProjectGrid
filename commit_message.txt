@@ -1,5 +1,3 @@
-fix: Display Google Workspace asset links and improve error handling
+feat: Add console logs for debugging asset display
 
-This commit addresses the issue where Google Workspace asset links were not being displayed in the UI.
-- Modified `App.tsx` to ensure `setGeneratedAssets` is always called with the `assets` array, even if some Google Workspace API calls fail.
-- Updated `createGoogleDriveFolder`, `createGoogleDoc`, `createGoogleSheet`, `createGoogleSlide`, and `createGoogleCalendarEvent` functions in `services/googleWorkspaceService.ts` to return a placeholder URL ('#') on error, preventing the `generatedAssets` array from being empty.
+This commit adds console.log statements to `App.tsx` and `components/ResultsDisplay.tsx` to help debug why generated asset links are not appearing on the results page.
