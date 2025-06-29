@@ -3,7 +3,7 @@ import { PitchDeckContent } from '../types';
 
 const GOOGLE_DRIVE_API_BASE_URL = 'https://www.googleapis.com/drive/v3';
 const GOOGLE_SHEETS_API_BASE_URL = 'https://sheets.googleapis.com/v4/spreadsheets';
-const GOOGLE_SLIDES_API_BASE_URL = 'https://slides.googleapis.com/v1/presentations';
+const GOOGLE_SLIDES_API_BASE_URL = 'https://slides.googleapis.com/v1';
 
 export const createGoogleDriveFolder = async (folderName: string, accessToken: string): Promise<{ folderId: string, folderUrl: string }> => {
   try {
@@ -129,7 +129,7 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
         }
       ];
   
-      await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
+      await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/presentations/${presentationId}:batchUpdate`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ requests }),
