@@ -53,7 +53,7 @@ export const ProjectInputForm: React.FC<ProjectInputFormProps> = ({
           <span className="ml-3 text-gray-400">{logoFile ? logoFile.name : 'Upload a logo (optional)'}</span>
           <input id="logo-upload" name="logo-upload" type="file" className="sr-only" onChange={handleFileChange} accept="image/png, image/jpeg" />
         </label>
-        <p className="text-gray-500 text-sm sm:ml-4">If no logo is provided, we'll generate one for you.</p>
+        <p className="text-gray-500 text-sm sm:ml-4">If no logo is provided, we&apos;ll generate one for you.</p>
       </div>
       
       {error && (

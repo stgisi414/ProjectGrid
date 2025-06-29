@@ -37,7 +37,10 @@ export const generateProjectDetails = async (description: string): Promise<Proje
       },
     });
 
-    let jsonStr = response.text.trim();
+    let jsonStr = response.text?.trim();
+    if (!jsonStr) {
+      throw new Error("AI response text is empty or undefined.");
+    }
     const fenceRegex = /^```(\w*)?\s*\n?(.*?)\n?\s*```$/s;
     const match = jsonStr.match(fenceRegex);
     if (match && match[2]) {
@@ -80,7 +83,11 @@ export const generateLogo = async (projectName: string, projectObjective: string
         });
 
         if (response.generatedImages && response.generatedImages.length > 0) {
-            const base64ImageBytes: string = response.generatedImages[0].image.imageBytes;
+            const image = response.generatedImages[0].image;
+            if (!image || !image.imageBytes) {
+                throw new Error("Image or image bytes are undefined.");
+            }
+            const base64ImageBytes = image.imageBytes;
             return `data:image/jpeg;base64,${base64ImageBytes}`;
         } else {
             throw new Error("No image was generated.");

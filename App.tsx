@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { ProjectDetails, GeneratedAsset, AssetType, User } from './types';
 import { generateProjectDetails, generateLogo } from './services/geminiService';
 import * as GoogleAuth from './services/googleAuthService';
+import { createGoogleDriveFolder, createGoogleDoc, createGoogleSheet, createGoogleSlide, createGoogleCalendarEvent } from './services/googleWorkspaceService';
 import { ProjectInputForm } from './components/ProjectInputForm';
 import { LoadingSpinner } from './components/LoadingSpinner';
 import { ResultsDisplay } from './components/ResultsDisplay';
@@ -107,29 +108,48 @@ const App: React.FC = () => {
 
       // Step 3: Conditionally create Google Workspace assets if signed in
       if (isSignedIn && accessToken) {
-        // NOTE: This is where you would add actual Google Workspace API calls.
-        // e.g., createGoogleDriveFolder(details.projectName, accessToken);
-        await new Promise(resolve => setTimeout(resolve, 1500)); 
+        const assets: GeneratedAsset[] = [];
 
+        // Create Google Drive folder
+        const projectFolderUrl = await createGoogleDriveFolder(details.projectName, accessToken);
+        assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: projectFolderUrl });
+
+        // Create Google Docs
+        const projectProposalUrl = await createGoogleDoc('Project Proposal', projectFolderUrl, accessToken);
+        assets.push({ type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: projectProposalUrl });
+        const meetingNotesTemplateUrl = await createGoogleDoc('Meeting Notes Template', projectFolderUrl, accessToken);
+        assets.push({ type: AssetType.Docs, name: 'Meeting Notes Template', icon: <GoogleDocsIcon />, url: meetingNotesTemplateUrl });
+
+        // Create Google Sheets
+        const projectPlanUrl = await createGoogleSheet('Project Plan & Timeline', projectFolderUrl, accessToken);
+        assets.push({ type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: projectPlanUrl });
+        const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', projectFolderUrl, accessToken);
+        assets.push({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: budgetTrackerUrl });
+
+        // Create Google Slides
+        const pitchDeckUrl = await createGoogleSlide('Pitch Deck Template', projectFolderUrl, accessToken);
+        assets.push({ type: AssetType.Slides, name: 'Pitch Deck Template', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
+
+        // Create Google Calendar events
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
         const kickoffDate = tomorrow.toISOString().split('T')[0];
+        const kickoffTime = '09:00:00'; // Example time
+        const kickoffDateTime = `${kickoffDate}T${kickoffTime}`;
+        const kickoffEventUrl = await createGoogleCalendarEvent(
+          `${details.kickoffMeetingTitle}`,
+          `Kick-off meeting for ${details.projectName}`,
+          kickoffDateTime,
+          kickoffDateTime, // Assuming a short meeting for now
+          accessToken
+        );
+        assets.push({ type: AssetType.Calendar, name: `${details.kickoffMeetingTitle} on ${kickoffDate}`, icon: <GoogleCalendarIcon />, url: kickoffEventUrl });
 
-        const assets: GeneratedAsset[] = [
-          { type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: '#' },
-          { type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: '#' },
-          { type: AssetType.Docs, name: 'Meeting Notes Template', icon: <GoogleDocsIcon />, url: '#' },
-          { type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: '#' },
-          { type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: '#' },
-          { type: AssetType.Slides, name: 'Pitch Deck Template', icon: <GoogleSlidesIcon />, url: '#' },
-          { type: AssetType.Calendar, name: `${details.kickoffMeetingTitle} on ${kickoffDate}`, icon: <GoogleCalendarIcon />, url: '#' },
-          { type: AssetType.Calendar, name: 'Weekly Team Sync', icon: <GoogleCalendarIcon />, url: '#' },
-          { type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' },
-          { type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' },
-          { type: AssetType.Chat, name: `${details.projectName} Team Space`, icon: <GoogleChatIcon />, url: '#' },
-        ];
-        setGeneratedAssets(assets);
+        // Placeholder for other assets (Forms, Keep, Chat) - these don't have direct creation APIs in the same way
+        assets.push({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' });
+        assets.push({ type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' });
+        assets.push({ type: AssetType.Chat, name: `${details.projectName} Team Space`, icon: <GoogleChatIcon />, url: '#' });
       }
     } catch (e) {
       console.error(e);
@@ -160,9 +180,7 @@ const App: React.FC = () => {
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
             Project Grid
           </h1>
-          <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
-            Describe your project, and we'll instantly generate a branded workspace in Google Drive.
-          </p>
+          <p>Describe your project, and we&apos;ll instantly generate a branded workspace in Google Drive.</p>
         </header>
 
         <main className="bg-gray-800/50 rounded-2xl shadow-2xl p-6 sm:p-8 border border-gray-700">

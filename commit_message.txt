@@ -1,0 +1,8 @@
+feat: Integrate Google Workspace API and improve AI response handling
+
+This commit introduces the following changes:
+- Implemented Google Workspace API calls in `App.tsx` to create Drive folders, Docs, Sheets, Slides, and Calendar events.
+- Added a new service file `services/googleWorkspaceService.ts` to encapsulate Google Workspace API interactions.
+- Improved error handling for AI responses in `services/geminiService.ts` by adding checks for empty or undefined response text and image bytes.
+- Updated ESLint configuration and dependencies in `package.json` and `package-lock.json`.
+- Made minor text adjustments in `components/ProjectInputForm.tsx` and `App.tsx`.
