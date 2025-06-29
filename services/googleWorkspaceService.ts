@@ -51,7 +51,7 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
     }
 
     const data = await response.json();
-    return `https://docs.google.com/document/d/${data.id}/edit`;
+    return data.webViewLink;
   } catch (error) {
     console.error('Error creating Google Doc:', error);
     throw error;
@@ -80,7 +80,7 @@ export const createGoogleSheet = async (title: string, parentId: string, accessT
     }
 
     const data = await response.json();
-    return `https://docs.google.com/spreadsheets/d/${data.id}/edit`;
+    return data.webViewLink;
   } catch (error) {
     console.error('Error creating Google Sheet:', error);
     throw error;
@@ -109,7 +109,7 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
     }
 
     const data = await response.json();
-    return `https://docs.google.com/presentation/d/${data.id}/edit`;
+    return data.webViewLink;
   } catch (error) {
     console.error('Error creating Google Slide:', error);
     throw error;
