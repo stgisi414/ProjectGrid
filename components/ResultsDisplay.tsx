@@ -65,9 +65,13 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
           {assets.map((asset, index) => {
             const isClickable = asset.url && asset.url !== '#';
             
-            const handleClick = () => {
+            const handleClick = (e: React.MouseEvent) => {
+              e.preventDefault();
               if (isClickable) {
+                console.log('Opening URL:', asset.url);
                 window.open(asset.url, '_blank', 'noopener,noreferrer');
+              } else {
+                console.log('Asset not clickable:', asset.name, asset.url);
               }
             };
 
