@@ -147,18 +147,6 @@ const App: React.FC = () => {
         assets.push({ type: AssetType.Calendar, name: `${details.kickoffMeetingTitle} on ${kickoffDate}`, icon: <GoogleCalendarIcon />, url: kickoffEventUrl });
         
         setGeneratedAssets(assets);
-      } else if (!isSignedIn) {
-        const placeholderAssets: GeneratedAsset[] = [
-            { type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: '#' },
-            { type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: '#' },
-            { type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: '#' },
-            { type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: '#' },
-            { type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: '#' },
-            { type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' },
-            { type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' },
-            { type: AssetType.Calendar, name: details.kickoffMeetingTitle, icon: <GoogleCalendarIcon />, url: '#' },
-        ];
-        setGeneratedAssets(placeholderAssets);
       }
     } catch (e) {
       console.error(e);
