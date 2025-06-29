@@ -11,7 +11,7 @@ interface ResultsDisplayProps {
 
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl, onStartNew, colorTheme }) => {
   const hasFullGrid = assets.length > 0;
-  
+
   const headerStyle = {
     '--theme-color-start': colorTheme,
     '--theme-color-end': '#a855f7', // A nice purple that pairs well with most colors
@@ -62,7 +62,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
           {assets.map((asset, index) => {
             const isClickable = asset.url && asset.url !== '#';
             const CardComponent = isClickable ? 'a' : 'div';
-            
+
             return (
               <CardComponent
                 key={index}
@@ -97,7 +97,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
             </p>
          </div>
       )}
-      
+
       <div className="pt-4 text-center">
         <button
           onClick={onStartNew}
