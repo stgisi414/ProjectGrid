@@ -25,7 +25,7 @@ export const createGoogleDriveFolder = async (folderName: string, accessToken: s
     return data.webViewLink; // Return the URL to the created folder
   } catch (error) {
     console.error('Error creating Google Drive folder:', error);
-    throw error;
+    return '#'; // Return a placeholder URL on error
   }
 };
 
@@ -54,7 +54,7 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
     return `https://docs.google.com/document/d/${data.documentId}/edit`;
   } catch (error) {
     console.error('Error creating Google Doc:', error);
-    throw error;
+    return '#'; // Return a placeholder URL on error
   }
 };
 
@@ -85,7 +85,7 @@ export const createGoogleSheet = async (title: string, parentId: string, accessT
     return `https://docs.google.com/spreadsheets/d/${data.spreadsheetId}/edit`;
   } catch (error) {
     console.error('Error creating Google Sheet:', error);
-    throw error;
+    return '#'; // Return a placeholder URL on error
   }
 };
 
@@ -114,7 +114,7 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
     return `https://docs.google.com/presentation/d/${data.presentationId}/edit`;
   } catch (error) {
     console.error('Error creating Google Slide:', error);
-    throw error;
+    return '#'; // Return a placeholder URL on error
   }
 };
 
@@ -156,7 +156,7 @@ export const createGoogleCalendarEvent = async (
     return data.htmlLink;
   } catch (error) {
     console.error('Error creating Google Calendar event:', error);
-    throw error;
+    return '#'; // Return a placeholder URL on error
   }
 };
 

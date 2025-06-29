@@ -150,6 +150,7 @@ const App: React.FC = () => {
         assets.push({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' });
         assets.push({ type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' });
         assets.push({ type: AssetType.Chat, name: `${details.projectName} Team Space`, icon: <GoogleChatIcon />, url: '#' });
+        setGeneratedAssets(assets);
       }
     } catch (e) {
       console.error(e);
