@@ -1,5 +1,8 @@
 # Gemini
 client_secret.json
+token.json
+output.txt
+resolve-wizard-3091eca562a4.json
 
 # Dependencies
 /node_modules

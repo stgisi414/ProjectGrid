@@ -3,9 +3,7 @@
 import os
 import json
 import google.generativeai as genai
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
@@ -17,20 +15,12 @@ SCOPES = [
     'https://www.googleapis.com/auth/presentations',
 ]
 
+from google.oauth2 import service_account
+
 def get_credentials():
-    """Gets the user's credentials from a local file."""
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'client_secret.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+    """Gets credentials from a service account file."""
+    creds = service_account.Credentials.from_service_account_file(
+        'resolve-wizard-3091eca562a4.json', scopes=SCOPES)
     return creds
 
 def generate_project_details(description):
@@ -135,9 +125,9 @@ def main():
         # 5. Verify the branding
         print("Verifying branding...")
         if project_name in doc_content and brand_identity in doc_content:
-            print("\n✅ Branding verification successful!")
+            print("\nBranding verification successful!")
         else:
-            print("\n❌ Branding verification failed.")
+            print("\nBranding verification failed.")
             print(f"Expected to find '{project_name}' and '{brand_identity}'")
             print(f"Actual content: {doc_content}")
 
