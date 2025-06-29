@@ -8,6 +8,8 @@ channel = "stable-24_05"
 run = ["sh", "-c", "npm run preview -- --host 0.0.0.0"]
 deploymentTarget = "cloudrun"
 build = ["sh", "-c", "npm run build"]
+branch = "main"
+replit-managed = true
 
 [[ports]]
 localPort = 5173
