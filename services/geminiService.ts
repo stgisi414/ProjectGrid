@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { ProjectDetails } from '../types';
 
@@ -9,68 +8,70 @@ export const generateProjectDetails = async (description: string): Promise<Proje
   if (!ai) {
     // Provide a fallback object when API key is not set
     return {
-      projectName: "My New Project",
-      projectObjective: "To complete all project goals on time.",
-      brandIdentity: "A modern and innovative brand.",
-      colorTheme: "#4A90E2",
-      kickoffMeetingTitle: "Project Kick-off"
+        projectName: "My Test Project",
+        projectObjective: "A test project to showcase functionality.",
+        brandIdentity: "A friendly and approachable brand.",
+        colorTheme: "#4285F4",
+        kickoffMeetingTitle: "Test Project Kick-off",
+        projectProposal: "This is a sample project proposal.",
+        projectPlan: [["Task 1", "2025-01-01", "2025-01-05", "Admin"]],
+        budgetTracker: [["Expense", "Amount"], ["Initial Server Costs", "500"]],
+        pitchDeck: {
+            title: "Test Project Pitch",
+            subtitle: "Revolutionizing the test project industry.",
+            problem: { title: "The Problem", content: "Test projects are too boring." },
+            solution: { title: "Our Solution", content: "We make them exciting!" },
+            targetMarket: { title: "Target Market", content: "Everyone who needs a test project." },
+            team: { title: "Our Team", content: "A dedicated team of test project enthusiasts." }
+        },
+        feedbackForm: "What did you like most? What could be improved?",
+        projectChecklist: "1. Complete setup. 2. Deploy. 3. Celebrate."
     };
   }
 
   const prompt = `
-    You are a project management and branding assistant. Based on the following project description, extract key details.
+    You are a world-class business consultant and project manager. Based on the following project description, generate a comprehensive set of branded documents.
     Provide your response as a single, minified JSON object with no markdown.
-    The JSON object MUST have these keys:
+    The JSON object MUST have these keys, with detailed, well-structured content for each:
     - "projectName": A short, catchy name for the project.
     - "projectObjective": A one-sentence summary of the project's goal.
     - "brandIdentity": A brief description of the brand's personality and values.
-    - "colorTheme": A hex code for a primary color that fits the project's theme (e.g., "#4285F4").
+    - "colorTheme": A hex code for a primary color that fits the project's theme.
     - "kickoffMeetingTitle": A title for a calendar event for the project kick-off.
+    - "projectProposal": A 3-paragraph project proposal including an introduction, a "Scope of Work" section, and a "Timeline" section.
+    - "projectPlan": A 2D array of strings for a project plan with columns: "Task", "Start Date", "End Date", "Owner", and at least 5 tasks.
+    - "budgetTracker": A 2D array of strings for a budget with columns: "Item", "Category", "Cost", and at least 5 budget items.
+    - "pitchDeck": A JSON object with content for a 6-slide pitch deck. It must have keys: "title", "subtitle", "problem": {"title", "content"}, "solution": {"title", "content"}, "targetMarket": {"title", "content"}, "team": {"title", "content"}.
+    - "feedbackForm": A string containing at least 3 open-ended questions for a stakeholder feedback form.
+    - "projectChecklist": A string containing a numbered list of at least 5 key tasks for a project checklist.
 
     Project Description: "${description}"
   `;
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
+      model: "gemini-1.5-flash-latest",
       contents: prompt,
-      config: {
+      generationConfig: {
         responseMimeType: "application/json",
       },
       safetySettings: [
-        {
-          category: 'HARM_CATEGORY_HARASSMENT',
-          threshold: 'BLOCK_NONE',
-        },
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH',
-          threshold: 'BLOCK_NONE',
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'BLOCK_NONE',
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'BLOCK_NONE',
-        },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
       ],
     });
 
-    let jsonStr = response.text?.trim();
+    const jsonStr = response.text?.trim();
     if (!jsonStr) {
       throw new Error("AI response text is empty or undefined.");
-    }
-    const fenceRegex = /^```(\w*)?\s*\n?(.*?)\n?\s*```$/s;
-    const match = jsonStr.match(fenceRegex);
-    if (match && match[2]) {
-      jsonStr = match[2].trim();
     }
     
     const parsedData = JSON.parse(jsonStr);
     
-    // Basic validation
-    if (parsedData.projectName && parsedData.projectObjective && parsedData.brandIdentity && parsedData.colorTheme && parsedData.kickoffMeetingTitle) {
+    // Add more robust validation here based on the new structure
+    if (parsedData.projectName && parsedData.pitchDeck && parsedData.projectPlan) {
        return parsedData as ProjectDetails;
     } else {
         throw new Error("AI response is missing required fields.");
@@ -78,14 +79,7 @@ export const generateProjectDetails = async (description: string): Promise<Proje
 
   } catch (error) {
     console.error("Failed to generate project details:", error);
-    // Provide a fallback object in case of API error
-    return {
-      projectName: "My New Project",
-      projectObjective: "To complete all project goals on time.",
-      brandIdentity: "A modern and innovative brand.",
-      colorTheme: "#4A90E2",
-      kickoffMeetingTitle: "Project Kick-off"
-    };
+    throw new Error("Failed to generate project details from AI. Please try again.");
   }
 };
 
@@ -102,22 +96,10 @@ export const generateLogo = async (projectName: string, projectObjective: string
             prompt: prompt,
             config: { numberOfImages: 1, outputMimeType: 'image/jpeg' },
             safetySettings: [
-              {
-                category: 'HARM_CATEGORY_HARASSMENT',
-                threshold: 'BLOCK_NONE',
-              },
-              {
-                category: 'HARM_CATEGORY_HATE_SPEECH',
-                threshold: 'BLOCK_NONE',
-              },
-              {
-                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                threshold: 'BLOCK_NONE',
-              },
-              {
-                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                threshold: 'BLOCK_NONE',
-              },
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
             ],
         });
 
