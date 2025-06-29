@@ -11,17 +11,19 @@ export const generateProjectDetails = async (description: string): Promise<Proje
     return {
       projectName: "My New Project",
       projectObjective: "To complete all project goals on time.",
+      brandIdentity: "A modern and innovative brand.",
       colorTheme: "#4A90E2",
       kickoffMeetingTitle: "Project Kick-off"
     };
   }
 
   const prompt = `
-    You are a project management assistant. Based on the following project description, extract key details.
+    You are a project management and branding assistant. Based on the following project description, extract key details.
     Provide your response as a single, minified JSON object with no markdown.
     The JSON object MUST have these keys:
     - "projectName": A short, catchy name for the project.
     - "projectObjective": A one-sentence summary of the project's goal.
+    - "brandIdentity": A brief description of the brand's personality and values.
     - "colorTheme": A hex code for a primary color that fits the project's theme (e.g., "#4285F4").
     - "kickoffMeetingTitle": A title for a calendar event for the project kick-off.
 
@@ -68,7 +70,7 @@ export const generateProjectDetails = async (description: string): Promise<Proje
     const parsedData = JSON.parse(jsonStr);
     
     // Basic validation
-    if (parsedData.projectName && parsedData.projectObjective && parsedData.colorTheme && parsedData.kickoffMeetingTitle) {
+    if (parsedData.projectName && parsedData.projectObjective && parsedData.brandIdentity && parsedData.colorTheme && parsedData.kickoffMeetingTitle) {
        return parsedData as ProjectDetails;
     } else {
         throw new Error("AI response is missing required fields.");
@@ -80,6 +82,7 @@ export const generateProjectDetails = async (description: string): Promise<Proje
     return {
       projectName: "My New Project",
       projectObjective: "To complete all project goals on time.",
+      brandIdentity: "A modern and innovative brand.",
       colorTheme: "#4A90E2",
       kickoffMeetingTitle: "Project Kick-off"
     };

@@ -23,6 +23,7 @@ export interface GeneratedAsset {
 export interface ProjectDetails {
   projectName: string;
   projectObjective: string;
+  brandIdentity: string;
   colorTheme: string;
   kickoffMeetingTitle: string;
 }

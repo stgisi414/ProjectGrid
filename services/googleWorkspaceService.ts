@@ -29,9 +29,10 @@ export const createGoogleDriveFolder = async (folderName: string, accessToken: s
   }
 };
 
-export const createGoogleDoc = async (title: string, parentId: string, accessToken: string): Promise<string> => {
+export const createGoogleDoc = async (title: string, parentId: string, accessToken: string, content?: string): Promise<string> => {
   try {
-    const response = await fetch(`https://www.googleapis.com/drive/v3/files`, {
+    // First, create the empty document to get its ID
+    const createResponse = await fetch(`https://www.googleapis.com/drive/v3/files`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -44,23 +45,56 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
       }),
     });
 
-    if (!response.ok) {
-      const errorBody = await response.json();
+    if (!createResponse.ok) {
+      const errorBody = await createResponse.json();
       console.error('Failed to create Google Doc:', errorBody);
       throw new Error(`Failed to create Google Doc: ${errorBody.error.message}`);
     }
 
-    const data = await response.json();
-    return data.webViewLink;
+    const file = await createResponse.json();
+    const documentId = file.id;
+
+    // If content is provided, update the document with it
+    if (content) {
+      const updateResponse = await fetch(`https://docs.googleapis.com/v1/documents/${documentId}:batchUpdate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requests: [
+            {
+              insertText: {
+                location: {
+                  index: 1,
+                },
+                text: content,
+              },
+            },
+          ],
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const errorBody = await updateResponse.json();
+        console.error('Failed to update Google Doc content:', errorBody);
+        // We don't throw here because the file is already created. 
+        // We can decide to handle this more gracefully later.
+      }
+    }
+
+    return file.webViewLink;
   } catch (error) {
     console.error('Error creating Google Doc:', error);
     throw error;
   }
 };
 
-export const createGoogleSheet = async (title: string, parentId: string, accessToken: string): Promise<string> => {
+export const createGoogleSheet = async (title: string, parentId: string, accessToken: string, content?: string[][]): Promise<string> => {
   try {
-    const response = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files`, {
+    // Create the empty sheet first
+    const createResponse = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -73,23 +107,45 @@ export const createGoogleSheet = async (title: string, parentId: string, accessT
       }),
     });
 
-    if (!response.ok) {
-      const errorBody = await response.json();
+    if (!createResponse.ok) {
+      const errorBody = await createResponse.json();
       console.error('Failed to create Google Sheet:', errorBody);
       throw new Error(`Failed to create Google Sheet: ${errorBody.error.message}`);
     }
 
-    const data = await response.json();
-    return data.webViewLink;
+    const file = await createResponse.json();
+    const spreadsheetId = file.id;
+
+    // If content is provided, update the sheet with it
+    if (content) {
+      const updateResponse = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A1:append?valueInputOption=USER_ENTERED`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          values: content,
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const errorBody = await updateResponse.json();
+        console.error('Failed to update Google Sheet content:', errorBody);
+      }
+    }
+
+    return file.webViewLink;
   } catch (error) {
     console.error('Error creating Google Sheet:', error);
     throw error;
   }
 };
 
-export const createGoogleSlide = async (title: string, parentId: string, accessToken: string): Promise<string> => {
+export const createGoogleSlide = async (title: string, parentId: string, accessToken: string, content?: { title: string, subtitle: string }): Promise<string> => {
   try {
-    const response = await fetch(`https://www.googleapis.com/drive/v3/files`, {
+    // Create the empty presentation first
+    const createResponse = await fetch(`https://www.googleapis.com/drive/v3/files`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -102,14 +158,71 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
       }),
     });
 
-    if (!response.ok) {
-      const errorBody = await response.json();
+    if (!createResponse.ok) {
+      const errorBody = await createResponse.json();
       console.error('Failed to create Google Slide:', errorBody);
       throw new Error(`Failed to create Google Slide: ${errorBody.error.message}`);
     }
 
-    const data = await response.json();
-    return data.webViewLink;
+    const file = await createResponse.json();
+    const presentationId = file.id;
+
+    // If content is provided, add a title slide
+    if (content) {
+      const requests = [
+        {
+          createSlide: {
+            slideLayoutReference: {
+              predefinedLayout: 'TITLE_SLIDE'
+            },
+            placeholderIdMappings: [
+              {
+                layoutPlaceholder: {
+                  type: 'CENTERED_TITLE'
+                },
+                objectId: 'title'
+              },
+              {
+                layoutPlaceholder: {
+                  type: 'SUBTITLE'
+                },
+                objectId: 'subtitle'
+              }
+            ]
+          }
+        },
+        {
+          insertText: {
+            objectId: 'title',
+            text: content.title
+          }
+        },
+        {
+          insertText: {
+            objectId: 'subtitle',
+            text: content.subtitle
+          }
+        }
+      ];
+
+      const updateResponse = await fetch(`https://slides.googleapis.com/v1/presentations/${presentationId}:batchUpdate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requests
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        const errorBody = await updateResponse.json();
+        console.error('Failed to update Google Slide content:', errorBody);
+      }
+    }
+
+    return file.webViewLink;
   } catch (error) {
     console.error('Error creating Google Slide:', error);
     throw error;

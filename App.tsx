@@ -118,19 +118,19 @@ const App: React.FC = () => {
         assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: folderUrl });
 
         // Create Google Docs
-        const projectProposalUrl = await createGoogleDoc('Project Proposal', folderId, accessToken);
+        const projectProposalUrl = await createGoogleDoc('Project Proposal', folderId, accessToken, `Project Proposal for ${details.projectName}\n\n${details.brandIdentity}`);
         assets.push({ type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: projectProposalUrl });
-        const meetingNotesTemplateUrl = await createGoogleDoc('Meeting Notes Template', folderId, accessToken);
+        const meetingNotesTemplateUrl = await createGoogleDoc('Meeting Notes Template', folderId, accessToken, `Meeting Notes\n\nProject: ${details.projectName}\n\nDate:`);
         assets.push({ type: AssetType.Docs, name: 'Meeting Notes Template', icon: <GoogleDocsIcon />, url: meetingNotesTemplateUrl });
 
         // Create Google Sheets
-        const projectPlanUrl = await createGoogleSheet('Project Plan & Timeline', folderId, accessToken);
+        const projectPlanUrl = await createGoogleSheet('Project Plan & Timeline', folderId, accessToken, [['Task', 'Start Date', 'End Date', 'Owner']]);
         assets.push({ type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: projectPlanUrl });
-        const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', folderId, accessToken);
+        const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', folderId, accessToken, [['Item', 'Category', 'Cost']]);
         assets.push({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: budgetTrackerUrl });
 
         // Create Google Slides
-        const pitchDeckUrl = await createGoogleSlide('Pitch Deck Template', folderId, accessToken);
+        const pitchDeckUrl = await createGoogleSlide('Pitch Deck Template', folderId, accessToken, { title: details.projectName, subtitle: details.projectObjective });
         assets.push({ type: AssetType.Slides, name: 'Pitch Deck Template', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
 
         // Create Google Calendar events

@@ -12,6 +12,9 @@ const SCOPES = [
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/drive', // For creating folders, docs, sheets, slides
+  'https://www.googleapis.com/auth/documents', // For editing docs
+  'https://www.googleapis.com/auth/spreadsheets', // For editing sheets
+  'https://www.googleapis.com/auth/presentations', // For editing slides
   'https://www.googleapis.com/auth/calendar.events', // For creating calendar events
 ].join(' ');
 
