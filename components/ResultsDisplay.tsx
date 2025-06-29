@@ -34,6 +34,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
           .asset-card:hover .asset-name {
             color: var(--theme-color);
           }
+          a.asset-card {
+            cursor: pointer;
+          }
         `}
       </style>
       <div className="text-center">
@@ -61,22 +64,25 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
           )}
           {assets.map((asset, index) => {
             const isClickable = asset.url && asset.url !== '#';
-            const CardComponent = isClickable ? 'a' : 'div';
+            
+            const handleClick = () => {
+              if (isClickable) {
+                window.open(asset.url, '_blank', 'noopener,noreferrer');
+              }
+            };
 
             return (
-              <CardComponent
+              <div
                 key={index}
-                href={isClickable ? asset.url : undefined}
-                target={isClickable ? '_blank' : undefined}
-                rel={isClickable ? 'noopener noreferrer' : undefined}
-                className={`asset-card bg-gray-900/70 p-4 rounded-xl border border-gray-700 flex items-center space-x-4 hover:bg-gray-700/50 transition-all duration-200 ${isClickable ? 'cursor-pointer' : ''}`}
+                onClick={handleClick}
+                className={`asset-card bg-gray-900/70 p-4 rounded-xl border border-gray-700 flex items-center space-x-4 hover:bg-gray-700/50 transition-all duration-200 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
               >
                 <div className="flex-shrink-0 w-10 h-10">{asset.icon}</div>
                 <div className="flex-1">
                   <p className="font-semibold text-white asset-name transition-colors duration-200">{asset.name}</p>
                   <p className="text-sm text-gray-400">{asset.type}</p>
                 </div>
-              </CardComponent>
+              </div>
             );
           })}
         </div>
