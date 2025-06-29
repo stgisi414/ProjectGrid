@@ -35,7 +35,8 @@ export const initTokenClient = (callback: (tokenResponse: google.accounts.oauth2
             console.error("GSI Error:", error);
             // Propagate the error so the main app can handle it.
             reject(new Error("An error occurred during Google Sign-In."));
-          }
+          },
+          ux_mode: 'popup'
         });
         resolve();
       } else {
