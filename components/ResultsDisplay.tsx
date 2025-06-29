@@ -34,6 +34,10 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
           .asset-card:hover .asset-name {
             color: var(--theme-color);
           }
+          .asset-card {
+            position: relative;
+            z-index: 10;
+          }
           a.asset-card {
             cursor: pointer;
           }
