@@ -35,6 +35,24 @@ export const generateProjectDetails = async (description: string): Promise<Proje
       config: {
         responseMimeType: "application/json",
       },
+      safetySettings: [
+        {
+          category: 'HARM_CATEGORY_HARASSMENT',
+          threshold: 'BLOCK_NONE',
+        },
+        {
+          category: 'HARM_CATEGORY_HATE_SPEECH',
+          threshold: 'BLOCK_NONE',
+        },
+        {
+          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+          threshold: 'BLOCK_NONE',
+        },
+        {
+          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+          threshold: 'BLOCK_NONE',
+        },
+      ],
     });
 
     let jsonStr = response.text?.trim();
@@ -80,6 +98,24 @@ export const generateLogo = async (projectName: string, projectObjective: string
             model: 'imagen-3.0-generate-002',
             prompt: prompt,
             config: { numberOfImages: 1, outputMimeType: 'image/jpeg' },
+            safetySettings: [
+              {
+                category: 'HARM_CATEGORY_HARASSMENT',
+                threshold: 'BLOCK_NONE',
+              },
+              {
+                category: 'HARM_CATEGORY_HATE_SPEECH',
+                threshold: 'BLOCK_NONE',
+              },
+              {
+                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                threshold: 'BLOCK_NONE',
+              },
+              {
+                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                threshold: 'BLOCK_NONE',
+              },
+            ],
         });
 
         if (response.generatedImages && response.generatedImages.length > 0) {
