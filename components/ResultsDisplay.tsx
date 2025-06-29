@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GeneratedAsset } from '../types';
 
