@@ -69,7 +69,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
                 href={isClickable ? asset.url : undefined}
                 target={isClickable ? '_blank' : undefined}
                 rel={isClickable ? 'noopener noreferrer' : undefined}
-                className="asset-card bg-gray-900/70 p-4 rounded-xl border border-gray-700 flex items-center space-x-4 hover:bg-gray-700/50 transition-all duration-200"
+                className={`asset-card bg-gray-900/70 p-4 rounded-xl border border-gray-700 flex items-center space-x-4 hover:bg-gray-700/50 transition-all duration-200 ${isClickable ? 'cursor-pointer' : ''}`}
               >
                 <div className="flex-shrink-0 w-10 h-10">{asset.icon}</div>
                 <div className="flex-1">
