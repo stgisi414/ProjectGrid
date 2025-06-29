@@ -122,8 +122,13 @@ const App: React.FC = () => {
         const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', folderId, accessToken, details.budgetTracker);
         assets.push({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: budgetTrackerUrl });
 
-        const pitchDeckUrl = await createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck);
-        assets.push({ type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
+        try {
+          const pitchDeckUrl = await createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck);
+          assets.push({ type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
+        } catch (slideError) {
+          console.error('Failed to create pitch deck:', slideError);
+          assets.push({ type: AssetType.Slides, name: 'Pitch Deck (Failed)', icon: <GoogleSlidesIcon />, url: '#' });
+        }
 
         const feedbackFormUrl = await createGoogleDoc('Stakeholder Feedback Form', folderId, accessToken, details.feedbackForm);
         assets.push({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: feedbackFormUrl });

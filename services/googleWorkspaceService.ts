@@ -90,62 +90,92 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
       const file = await createResponse.json();
       const presentationId = file.id;
   
-      const requests = [];
-      
       // Get the presentation to find the default slide's ID
       const presentation = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}`, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
       }).then(res => res.json());
       
+      // First, delete the default slide if it exists
       if (presentation.slides && presentation.slides.length > 0) {
         const defaultSlideId = presentation.slides[0].objectId;
-        requests.push({
-            deleteObject: {
-                objectId: defaultSlideId,
-            },
+        const deleteResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                requests: [{
+                    deleteObject: {
+                        objectId: defaultSlideId,
+                    },
+                }]
+            }),
         });
+        if (!deleteResponse.ok) {
+            console.warn('Failed to delete default slide, continuing...');
+        }
       }
-  
-      // Create Title Slide
-      const titleSlideId = "title_slide_01";
-      requests.push({
-          createSlide: {
-              objectId: titleSlideId,
-              slideLayoutReference: { predefinedLayout: 'TITLE_SLIDE' },
-              placeholderIdMappings: [
-                  { layoutPlaceholder: { type: 'CENTERED_TITLE' }, objectId: "title_placeholder_01" },
-                  { layoutPlaceholder: { type: 'SUBTITLE' }, objectId: "subtitle_placeholder_01" }
-              ]
-          }
-      });
-      requests.push({ insertText: { objectId: "title_placeholder_01", text: content.title } });
-      requests.push({ insertText: { objectId: "subtitle_placeholder_01", text: content.subtitle } });
-  
-      // Create Content Slides
-      const contentSlides = [content.problem, content.solution, content.targetMarket, content.team];
-      contentSlides.forEach((slideContent, index) => {
-          const slideId = `content_slide_${index}`;
-          const titlePlaceholderId = `content_title_${index}`;
-          const bodyPlaceholderId = `content_body_${index}`;
-          requests.push({
-              createSlide: {
-                  objectId: slideId,
-                  slideLayoutReference: { predefinedLayout: 'TITLE_AND_BODY' },
-                  placeholderIdMappings: [
-                      { layoutPlaceholder: { type: 'TITLE' }, objectId: titlePlaceholderId },
-                      { layoutPlaceholder: { type: 'BODY' }, objectId: bodyPlaceholderId }
-                  ]
-              }
-          });
-          requests.push({ insertText: { objectId: titlePlaceholderId, text: slideContent.title } });
-          requests.push({ insertText: { objectId: bodyPlaceholderId, text: slideContent.content } });
-      });
-  
-      await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
+
+      // Create slides one by one to avoid conflicts
+      const slides = [
+        { type: 'TITLE_SLIDE', title: content.title, subtitle: content.subtitle },
+        { type: 'TITLE_AND_BODY', title: content.problem.title, body: content.problem.content },
+        { type: 'TITLE_AND_BODY', title: content.solution.title, body: content.solution.content },
+        { type: 'TITLE_AND_BODY', title: content.targetMarket.title, body: content.targetMarket.content },
+        { type: 'TITLE_AND_BODY', title: content.team.title, body: content.team.content }
+      ];
+
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        const slideId = `slide_${i}`;
+        
+        // Create slide
+        const createSlideRequest = {
+          requests: [{
+            createSlide: {
+              objectId: slideId,
+              slideLayoutReference: { predefinedLayout: slide.type }
+            }
+          }]
+        };
+
+        const createSlideResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ requests }),
-      });
+          body: JSON.stringify(createSlideRequest),
+        });
+
+        if (!createSlideResponse.ok) {
+          console.warn(`Failed to create slide ${i}, skipping...`);
+          continue;
+        }
+
+        // Add text to slide
+        const textRequests = [];
+        if (slide.type === 'TITLE_SLIDE') {
+          textRequests.push({
+            insertText: {
+              objectId: slideId,
+              text: slide.title,
+              insertionIndex: 0
+            }
+          });
+        } else {
+          textRequests.push({
+            insertText: {
+              objectId: slideId,
+              text: `${slide.title}\n\n${slide.body}`,
+              insertionIndex: 0
+            }
+          });
+        }
+
+        if (textRequests.length > 0) {
+          await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requests: textRequests }),
+          });
+        }
+      }
   
       return file.webViewLink;
     } catch (error) {
