@@ -1,3 +1,0 @@
-feat: Add console logs for debugging asset display
-
-This commit adds console.log statements to `App.tsx` and `components/ResultsDisplay.tsx` to help debug why generated asset links are not appearing on the results page.

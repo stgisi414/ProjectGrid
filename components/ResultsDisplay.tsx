@@ -10,7 +10,6 @@ interface ResultsDisplayProps {
 }
 
 export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl, onStartNew, colorTheme }) => {
-  console.log('ResultsDisplay received assets:', assets);
   const hasFullGrid = assets.length > 0;
   
   const headerStyle = {
