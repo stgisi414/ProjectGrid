@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { ProjectDetails } from '../types';
 
@@ -79,6 +80,9 @@ export const generateProjectDetails = async (description: string): Promise<Proje
 
   } catch (error) {
     console.error("Failed to generate project details:", error);
+    if (error instanceof Error) {
+        throw new Error(`Failed to generate project details from AI: ${error.message}`);
+    }
     throw new Error("Failed to generate project details from AI. Please try again.");
   }
 };
