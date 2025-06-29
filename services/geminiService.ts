@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { ProjectDetails } from '../types';
 
@@ -64,11 +63,19 @@ export const generateProjectDetails = async (description: string): Promise<Proje
       ],
     });
 
-    const jsonStr = response.text?.trim();
+    let jsonStr = response.text?.trim();
     if (!jsonStr) {
       throw new Error("AI response text is empty or undefined.");
     }
     
+    // Clean the JSON string
+    const startIndex = jsonStr.indexOf('{');
+    const endIndex = jsonStr.lastIndexOf('}');
+    if (startIndex === -1 || endIndex === -1) {
+        throw new Error("Invalid JSON response from AI.");
+    }
+    jsonStr = jsonStr.substring(startIndex, endIndex + 1);
+
     const parsedData = JSON.parse(jsonStr);
     
     // Add more robust validation here based on the new structure

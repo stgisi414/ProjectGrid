@@ -83,6 +83,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ assets, logoUrl,
               <div
                 key={index}
                 onClick={handleClick}
+                data-testid={`asset-card-${index}`}
                 className={`asset-card bg-gray-900/70 p-4 rounded-xl border border-gray-700 flex items-center space-x-4 hover:bg-gray-700/50 transition-all duration-200 ${isClickable ? 'cursor-pointer' : 'cursor-default'}`}
               >
                 <div className="flex-shrink-0 w-10 h-10">{asset.icon}</div>
