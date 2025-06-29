@@ -162,7 +162,24 @@ export const createGoogleCalendarEvent = async (
 
 const moveFileToFolder = async (fileId: string, folderId: string, accessToken: string): Promise<void> => {
   try {
-    const response = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files/${fileId}?addParents=${folderId}&removeParents=root`, {
+    // Get the current parents of the file
+    const fileResponse = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files/${fileId}?fields=parents`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!fileResponse.ok) {
+      const errorBody = await fileResponse.json();
+      console.error('Failed to get file parents:', errorBody);
+      throw new Error(`Failed to get file parents: ${errorBody.error.message}`);
+    }
+
+    const fileData = await fileResponse.json();
+    const currentParents = fileData.parents ? fileData.parents.join(',') : '';
+
+    const response = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files/${fileId}?addParents=${folderId}&removeParents=${currentParents}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

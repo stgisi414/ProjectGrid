@@ -1,8 +1,6 @@
-feat: Integrate Google Workspace API and improve AI response handling
+fix: Ensure correct file movement in Google Drive
 
-This commit introduces the following changes:
-- Implemented Google Workspace API calls in `App.tsx` to create Drive folders, Docs, Sheets, Slides, and Calendar events.
-- Added a new service file `services/googleWorkspaceService.ts` to encapsulate Google Workspace API interactions.
-- Improved error handling for AI responses in `services/geminiService.ts` by adding checks for empty or undefined response text and image bytes.
-- Updated ESLint configuration and dependencies in `package.json` and `package-lock.json`.
-- Made minor text adjustments in `components/ProjectInputForm.tsx` and `App.tsx`.
+This commit fixes an issue where Google Drive files were not being moved correctly to the newly created project folder.
+The `moveFileToFolder` function in `services/googleWorkspaceService.ts` has been updated to:
+- First fetch the current parents of the file.
+- Then remove all current parents when adding the new parent, ensuring the file is correctly moved regardless of its initial location.
