@@ -1,7 +1,7 @@
 
 const GOOGLE_DRIVE_API_BASE_URL = 'https://www.googleapis.com/drive/v3';
 
-export const createGoogleDriveFolder = async (folderName: string, accessToken: string): Promise<string> => {
+export const createGoogleDriveFolder = async (folderName: string, accessToken: string): Promise<{ folderId: string, folderUrl: string }> => {
   try {
     const response = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files`, {
       method: 'POST',
@@ -22,23 +22,25 @@ export const createGoogleDriveFolder = async (folderName: string, accessToken: s
     }
 
     const data = await response.json();
-    return data.webViewLink; // Return the URL to the created folder
+    return { folderId: data.id, folderUrl: data.webViewLink };
   } catch (error) {
     console.error('Error creating Google Drive folder:', error);
-    return '#'; // Return a placeholder URL on error
+    throw error;
   }
 };
 
 export const createGoogleDoc = async (title: string, parentId: string, accessToken: string): Promise<string> => {
   try {
-    const response = await fetch(`https://docs.googleapis.com/v1/documents`, {
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        title: title,
+        name: title,
+        mimeType: 'application/vnd.google-apps.document',
+        parents: [parentId],
       }),
     });
 
@@ -49,27 +51,25 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
     }
 
     const data = await response.json();
-    // Move the created document to the specified parent folder
-    await moveFileToFolder(data.documentId, parentId, accessToken);
-    return `https://docs.google.com/document/d/${data.documentId}/edit`;
+    return `https://docs.google.com/document/d/${data.id}/edit`;
   } catch (error) {
     console.error('Error creating Google Doc:', error);
-    return '#'; // Return a placeholder URL on error
+    throw error;
   }
 };
 
 export const createGoogleSheet = async (title: string, parentId: string, accessToken: string): Promise<string> => {
   try {
-    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets`, {
+    const response = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        properties: {
-          title: title,
-        },
+        name: title,
+        mimeType: 'application/vnd.google-apps.spreadsheet',
+        parents: [parentId],
       }),
     });
 
@@ -80,25 +80,25 @@ export const createGoogleSheet = async (title: string, parentId: string, accessT
     }
 
     const data = await response.json();
-    // Move the created spreadsheet to the specified parent folder
-    await moveFileToFolder(data.spreadsheetId, parentId, accessToken);
-    return `https://docs.google.com/spreadsheets/d/${data.spreadsheetId}/edit`;
+    return `https://docs.google.com/spreadsheets/d/${data.id}/edit`;
   } catch (error) {
     console.error('Error creating Google Sheet:', error);
-    return '#'; // Return a placeholder URL on error
+    throw error;
   }
 };
 
 export const createGoogleSlide = async (title: string, parentId: string, accessToken: string): Promise<string> => {
   try {
-    const response = await fetch(`https://slides.googleapis.com/v1/presentations`, {
+    const response = await fetch(`https://www.googleapis.com/drive/v3/files`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        title: title,
+        name: title,
+        mimeType: 'application/vnd.google-apps.presentation',
+        parents: [parentId],
       }),
     });
 
@@ -109,12 +109,10 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
     }
 
     const data = await response.json();
-    // Move the created presentation to the specified parent folder
-    await moveFileToFolder(data.presentationId, parentId, accessToken);
-    return `https://docs.google.com/presentation/d/${data.presentationId}/edit`;
+    return `https://docs.google.com/presentation/d/${data.id}/edit`;
   } catch (error) {
     console.error('Error creating Google Slide:', error);
-    return '#'; // Return a placeholder URL on error
+    throw error;
   }
 };
 
@@ -160,40 +158,4 @@ export const createGoogleCalendarEvent = async (
   }
 };
 
-const moveFileToFolder = async (fileId: string, folderId: string, accessToken: string): Promise<void> => {
-  try {
-    // Get the current parents of the file
-    const fileResponse = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files/${fileId}?fields=parents`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    });
 
-    if (!fileResponse.ok) {
-      const errorBody = await fileResponse.json();
-      console.error('Failed to get file parents:', errorBody);
-      throw new Error(`Failed to get file parents: ${errorBody.error.message}`);
-    }
-
-    const fileData = await fileResponse.json();
-    const currentParents = fileData.parents ? fileData.parents.join(',') : '';
-
-    const response = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files/${fileId}?addParents=${folderId}&removeParents=${currentParents}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorBody = await response.json();
-      console.error('Failed to move file to folder:', errorBody);
-      throw new Error(`Failed to move file to folder: ${errorBody.error.message}`);
-    }
-  } catch (error) {
-    console.error('Error moving file to folder:', error);
-    throw error;
-  }
-};

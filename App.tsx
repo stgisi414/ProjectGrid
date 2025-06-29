@@ -111,23 +111,26 @@ const App: React.FC = () => {
         const assets: GeneratedAsset[] = [];
 
         // Create Google Drive folder
-        const projectFolderUrl = await createGoogleDriveFolder(details.projectName, accessToken);
-        assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: projectFolderUrl });
+        const { folderId, folderUrl } = await createGoogleDriveFolder(details.projectName, accessToken);
+        if (!folderId) {
+          throw new Error("Failed to create project folder, cannot proceed.");
+        }
+        assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: folderUrl });
 
         // Create Google Docs
-        const projectProposalUrl = await createGoogleDoc('Project Proposal', projectFolderUrl, accessToken);
+        const projectProposalUrl = await createGoogleDoc('Project Proposal', folderId, accessToken);
         assets.push({ type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: projectProposalUrl });
-        const meetingNotesTemplateUrl = await createGoogleDoc('Meeting Notes Template', projectFolderUrl, accessToken);
+        const meetingNotesTemplateUrl = await createGoogleDoc('Meeting Notes Template', folderId, accessToken);
         assets.push({ type: AssetType.Docs, name: 'Meeting Notes Template', icon: <GoogleDocsIcon />, url: meetingNotesTemplateUrl });
 
         // Create Google Sheets
-        const projectPlanUrl = await createGoogleSheet('Project Plan & Timeline', projectFolderUrl, accessToken);
+        const projectPlanUrl = await createGoogleSheet('Project Plan & Timeline', folderId, accessToken);
         assets.push({ type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: projectPlanUrl });
-        const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', projectFolderUrl, accessToken);
+        const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', folderId, accessToken);
         assets.push({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: budgetTrackerUrl });
 
         // Create Google Slides
-        const pitchDeckUrl = await createGoogleSlide('Pitch Deck Template', projectFolderUrl, accessToken);
+        const pitchDeckUrl = await createGoogleSlide('Pitch Deck Template', folderId, accessToken);
         assets.push({ type: AssetType.Slides, name: 'Pitch Deck Template', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
 
         // Create Google Calendar events
@@ -147,6 +150,7 @@ const App: React.FC = () => {
         assets.push({ type: AssetType.Calendar, name: `${details.kickoffMeetingTitle} on ${kickoffDate}`, icon: <GoogleCalendarIcon />, url: kickoffEventUrl });
 
         // Placeholder for other assets (Forms, Keep, Chat) - these don't have direct creation APIs in the same way
+        assets.push({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' });
         assets.push({ type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' });
         assets.push({ type: AssetType.Chat, name: `${details.projectName} Team Space`, icon: <GoogleChatIcon />, url: '#' });
         
@@ -171,7 +175,15 @@ const App: React.FC = () => {
       }
     } catch (e) {
       console.error(e);
-      setError(e instanceof Error ? e.message : 'An unknown error occurred.');
+      let errorMessage = 'An unknown error occurred during asset generation.';
+      if (e instanceof Error) {
+        if (e.message.includes('403')) {
+          errorMessage = `An API permission is missing. Please ensure the following APIs are enabled in your Google Cloud project: Google Drive, Google Docs, Google Sheets, Google Slides, and Google Calendar.`;
+        } else {
+          errorMessage = e.message;
+        }
+      }
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
