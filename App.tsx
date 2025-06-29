@@ -113,22 +113,22 @@ const App: React.FC = () => {
         }
         assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: folderUrl });
 
-        const projectProposalUrl = await createGoogleDoc('Project Proposal', folderId, accessToken, details.projectProposal);
+        const { url: projectProposalUrl } = await createGoogleDoc('Project Proposal', folderId, accessToken, details.projectProposal);
         assets.push({ type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: projectProposalUrl });
         
-        const projectPlanUrl = await createGoogleSheet('Project Plan & Timeline', folderId, accessToken, details.projectPlan);
+        const { url: projectPlanUrl } = await createGoogleSheet('Project Plan & Timeline', folderId, accessToken, details.projectPlan);
         assets.push({ type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: projectPlanUrl });
         
-        const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', folderId, accessToken, details.budgetTracker);
+        const { url: budgetTrackerUrl } = await createGoogleSheet('Budget Tracker', folderId, accessToken, details.budgetTracker);
         assets.push({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: budgetTrackerUrl });
 
-        const pitchDeckUrl = await createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck);
+        const { url: pitchDeckUrl } = await createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck);
         assets.push({ type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
-        
-        const feedbackFormUrl = await createGoogleDoc('Stakeholder Feedback Form', folderId, accessToken, details.feedbackForm);
+
+        const { url: feedbackFormUrl } = await createGoogleDoc('Stakeholder Feedback Form', folderId, accessToken, details.feedbackForm);
         assets.push({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: feedbackFormUrl });
 
-        const checklistUrl = await createGoogleDoc('Project Checklist', folderId, accessToken, details.projectChecklist);
+        const { url: checklistUrl } = await createGoogleDoc('Project Checklist', folderId, accessToken, details.projectChecklist);
         assets.push({ type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: checklistUrl });
 
         const today = new Date();
@@ -137,7 +137,7 @@ const App: React.FC = () => {
         const kickoffDate = tomorrow.toISOString().split('T')[0];
         const kickoffTime = '09:00:00';
         const kickoffDateTime = `${kickoffDate}T${kickoffTime}`;
-        const kickoffEventUrl = await createGoogleCalendarEvent(
+        const { url: kickoffEventUrl } = await createGoogleCalendarEvent(
           `${details.kickoffMeetingTitle}`,
           `Kick-off meeting for ${details.projectName}`,
           kickoffDateTime,

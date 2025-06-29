@@ -50,7 +50,7 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
   }
 };
 
-export const createGoogleSheet = async (title: string, parentId: string, accessToken: string, values?: string[][]): Promise<string> => {
+export const createGoogleSheet = async (title: string, parentId: string, accessToken: string, values?: string[][]): Promise<{ url: string }> => {
   try {
     const createResponse = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files`, {
       method: 'POST',
@@ -69,14 +69,14 @@ export const createGoogleSheet = async (title: string, parentId: string, accessT
         body: JSON.stringify({ values }),
       });
     }
-    return file.webViewLink;
+    return { url: file.webViewLink };
   } catch (error) {
     console.error('Error creating Google Sheet:', error);
     throw error;
   }
 };
 
-export const createGoogleSlide = async (title: string, parentId: string, accessToken: string, content: PitchDeckContent): Promise<string> => {
+export const createGoogleSlide = async (title: string, parentId: string, accessToken: string, content: PitchDeckContent): Promise<{ url: string }> => {
     try {
       const createResponse = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files`, {
           method: 'POST',
@@ -135,7 +135,7 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
           body: JSON.stringify({ requests }),
       });
   
-      return file.webViewLink;
+      return { url: file.webViewLink };
     } catch (error) {
       console.error('Error creating Google Slide:', error);
       throw error;
@@ -149,7 +149,7 @@ export const createGoogleCalendarEvent = async (
   startTime: string,
   endTime: string,
   accessToken: string
-): Promise<string> => {
+): Promise<{ url: string }> => {
   try {
     const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events`, {
       method: 'POST',
@@ -166,9 +166,9 @@ export const createGoogleCalendarEvent = async (
       throw new Error(`Failed to create Google Calendar event: ${errorBody.error.message}`);
     }
     const data = await response.json();
-    return data.htmlLink;
+    return { url: data.htmlLink };
   } catch (error) {
     console.error('Error creating Google Calendar event:', error);
-    return '#';
+    return { url: '#' };
   }
 };
