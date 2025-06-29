@@ -24,7 +24,7 @@ export const createGoogleDriveFolder = async (folderName: string, accessToken: s
   }
 };
 
-export const createGoogleDoc = async (title: string, parentId: string, accessToken: string, content?: string): Promise<string> => {
+export const createGoogleDoc = async (title: string, parentId: string, accessToken: string, content?: string): Promise<{ url: string }> => {
   try {
     const createResponse = await fetch(`${GOOGLE_DRIVE_API_BASE_URL}/files`, {
       method: 'POST',
@@ -43,7 +43,7 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
         body: JSON.stringify({ requests: [{ insertText: { location: { index: 1 }, text: content } }] }),
       });
     }
-    return file.webViewLink;
+    return { url: file.webViewLink };
   } catch (error) {
     console.error('Error creating Google Doc:', error);
     throw error;
@@ -90,92 +90,50 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
       const file = await createResponse.json();
       const presentationId = file.id;
   
-      // Get the presentation to find the default slide's ID
-      const presentation = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}`, {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-      }).then(res => res.json());
-      
-      // First, delete the default slide if it exists
-      if (presentation.slides && presentation.slides.length > 0) {
-        const defaultSlideId = presentation.slides[0].objectId;
-        const deleteResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                requests: [{
-                    deleteObject: {
-                        objectId: defaultSlideId,
-                    },
-                }]
-            }),
-        });
-        if (!deleteResponse.ok) {
-            console.warn('Failed to delete default slide, continuing...');
+      const requests = [
+        {
+          createSlide: {
+            objectId: "title_slide",
+            slideLayoutReference: {
+              predefinedLayout: "TITLE_SLIDE"
+            },
+            placeholderIdMappings: [
+              {
+                layoutPlaceholder: {
+                  type: "CENTERED_TITLE"
+                },
+                objectId: "title_placeholder"
+              },
+              {
+                layoutPlaceholder: {
+                  type: "SUBTITLE"
+                },
+                objectId: "subtitle_placeholder"
+              }
+            ]
+          }
+        },
+        {
+          insertText: {
+            objectId: "title_placeholder",
+            text: content.title,
+            insertionIndex: 0
+          }
+        },
+        {
+          insertText: {
+            objectId: "subtitle_placeholder",
+            text: content.subtitle,
+            insertionIndex: 0
+          }
         }
-      }
-
-      // Create slides one by one to avoid conflicts
-      const slides = [
-        { type: 'TITLE_SLIDE', title: content.title, subtitle: content.subtitle },
-        { type: 'TITLE_AND_BODY', title: content.problem.title, body: content.problem.content },
-        { type: 'TITLE_AND_BODY', title: content.solution.title, body: content.solution.content },
-        { type: 'TITLE_AND_BODY', title: content.targetMarket.title, body: content.targetMarket.content },
-        { type: 'TITLE_AND_BODY', title: content.team.title, body: content.team.content }
       ];
-
-      for (let i = 0; i < slides.length; i++) {
-        const slide = slides[i];
-        const slideId = `slide_${i}`;
-        
-        // Create slide
-        const createSlideRequest = {
-          requests: [{
-            createSlide: {
-              objectId: slideId,
-              slideLayoutReference: { predefinedLayout: slide.type }
-            }
-          }]
-        };
-
-        const createSlideResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
+  
+      await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify(createSlideRequest),
-        });
-
-        if (!createSlideResponse.ok) {
-          console.warn(`Failed to create slide ${i}, skipping...`);
-          continue;
-        }
-
-        // Add text to slide
-        const textRequests = [];
-        if (slide.type === 'TITLE_SLIDE') {
-          textRequests.push({
-            insertText: {
-              objectId: slideId,
-              text: slide.title,
-              insertionIndex: 0
-            }
-          });
-        } else {
-          textRequests.push({
-            insertText: {
-              objectId: slideId,
-              text: `${slide.title}\n\n${slide.body}`,
-              insertionIndex: 0
-            }
-          });
-        }
-
-        if (textRequests.length > 0) {
-          await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/${presentationId}:batchUpdate`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requests: textRequests }),
-          });
-        }
-      }
+          body: JSON.stringify({ requests }),
+      });
   
       return file.webViewLink;
     } catch (error) {

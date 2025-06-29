@@ -122,14 +122,9 @@ const App: React.FC = () => {
         const budgetTrackerUrl = await createGoogleSheet('Budget Tracker', folderId, accessToken, details.budgetTracker);
         assets.push({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: budgetTrackerUrl });
 
-        try {
-          const pitchDeckUrl = await createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck);
-          assets.push({ type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
-        } catch (slideError) {
-          console.error('Failed to create pitch deck:', slideError);
-          assets.push({ type: AssetType.Slides, name: 'Pitch Deck (Failed)', icon: <GoogleSlidesIcon />, url: '#' });
-        }
-
+        const pitchDeckUrl = await createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck);
+        assets.push({ type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
+        
         const feedbackFormUrl = await createGoogleDoc('Stakeholder Feedback Form', folderId, accessToken, details.feedbackForm);
         assets.push({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: feedbackFormUrl });
 
@@ -157,7 +152,11 @@ const App: React.FC = () => {
             { type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: '#' },
             { type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: '#' },
             { type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: '#' },
+            { type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: '#' },
             { type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: '#' },
+            { type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' },
+            { type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' },
+            { type: AssetType.Calendar, name: details.kickoffMeetingTitle, icon: <GoogleCalendarIcon />, url: '#' },
         ];
         setGeneratedAssets(placeholderAssets);
       }
