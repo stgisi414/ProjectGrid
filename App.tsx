@@ -3,7 +3,7 @@ import React from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { ProjectDetails, GeneratedAsset, AssetType, User } from './types';
 import { generateProjectDetails, generateLogo } from './services/geminiService';
-import * as GoogleAuth from './services/googleAuthService';
+import * as FirebaseAuth from './services/firebaseAuthService';
 import { createGoogleDriveFolder, createGoogleDoc, createGoogleSheet, createGoogleSlide, createGoogleCalendarEvent } from './services/googleWorkspaceService';
 import { ProjectInputForm } from './components/ProjectInputForm';
 import { LoadingSpinner } from './components/LoadingSpinner';
@@ -39,45 +39,49 @@ const App: React.FC = () => {
     setColorTheme('#4A90E2');
   };
 
-  const handleSignOut = useCallback(() => {
-    if (accessToken) {
-      GoogleAuth.revokeAccessToken(accessToken);
-    }
-    setAccessToken(null);
-    setUser(null);
-    resetStateForNewProject();
-  }, [accessToken]);
-
-  useEffect(() => {
-    if (GoogleAuth.isAuthAvailable) {
-        const checkGsiLoaded = setInterval(() => {
-        if (window.google?.accounts?.oauth2) {
-            clearInterval(checkGsiLoaded);
-            GoogleAuth.initTokenClient(async (tokenResponse) => {
-            setAccessToken(tokenResponse.access_token);
-            try {
-                const userInfo = await GoogleAuth.getUserInfo(tokenResponse.access_token);
-                setUser(userInfo);
-                setError(null); 
-            } catch (error) {
-                console.error(error);
-                setError("Failed to fetch user profile.");
-                setAccessToken(null);
-                setUser(null);
-            }
-            }).catch(err => {
-                console.error("Error initializing GSI client:", err);
-                setError("Sign-in is temporarily unavailable. Please try again later.");
-            });
-        }
-        }, 100);
-
-        return () => clearInterval(checkGsiLoaded);
+  const handleSignOut = useCallback(async () => {
+    try {
+      await FirebaseAuth.signOutUser();
+      setAccessToken(null);
+      setUser(null);
+      resetStateForNewProject();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      setError('Failed to sign out. Please try again.');
     }
   }, []);
 
-  const handleSignIn = () => {
-    GoogleAuth.requestAccessToken();
+  useEffect(() => {
+    if (FirebaseAuth.isAuthAvailable) {
+      const unsubscribe = FirebaseAuth.onAuthStateChange((firebaseUser) => {
+        if (firebaseUser) {
+          const user: User = {
+            name: firebaseUser.displayName || '',
+            email: firebaseUser.email || '',
+            picture: firebaseUser.photoURL || '',
+          };
+          setUser(user);
+          // Note: Access token needs to be obtained when signing in
+        } else {
+          setUser(null);
+          setAccessToken(null);
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, []);
+
+  const handleSignIn = async () => {
+    try {
+      const { user, accessToken } = await FirebaseAuth.signInWithGoogle();
+      setUser(user);
+      setAccessToken(accessToken);
+      setError(null);
+    } catch (error) {
+      console.error('Error signing in:', error);
+      setError('Failed to sign in. Please try again.');
+    }
   };
 
 
@@ -196,7 +200,7 @@ const App: React.FC = () => {
               error={error}
               logoFile={logoFile}
               isSignedIn={isSignedIn}
-              isAuthAvailable={GoogleAuth.isAuthAvailable}
+              isAuthAvailable={FirebaseAuth.isAuthAvailable}
               onSignIn={handleSignIn}
             />
           )}
