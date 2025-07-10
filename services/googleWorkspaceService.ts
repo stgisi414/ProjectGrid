@@ -41,6 +41,31 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
       throw new Error(`Failed to create Google Doc: ${errorBody.error?.message || 'Unknown error'}`);
     }
     const file = await createResponse.json();
+    
+    // Add content to the document if provided
+    if (content) {
+      try {
+        const updateResponse = await fetch(`https://docs.googleapis.com/v1/documents/${file.id}:batchUpdate`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requests: [{
+              insertText: {
+                location: { index: 1 },
+                text: content
+              }
+            }]
+          }),
+        });
+        if (!updateResponse.ok) {
+          const errorBody = await updateResponse.json();
+          console.error('Failed to add content to Google Doc:', errorBody);
+        }
+      } catch (contentError) {
+        console.error('Failed to add content to Google Doc:', contentError);
+      }
+    }
+    
     console.log('Successfully created Google Doc:', file.id);
     return { url: file.webViewLink || `https://docs.google.com/document/d/${file.id}/edit` };
   } catch (error) {
@@ -63,6 +88,30 @@ export const createGoogleSheet = async (title: string, parentId: string, accessT
       throw new Error(`Failed to create Google Sheet: ${errorBody.error?.message || 'Unknown error'}`);
     }
     const file = await createResponse.json();
+    
+    // Add values to the sheet if provided
+    if (values && values.length > 0) {
+      try {
+        const updateResponse = await fetch(`${GOOGLE_SHEETS_API_BASE_URL}/${file.id}/values/A1:batchUpdate`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            valueInputOption: 'RAW',
+            data: [{
+              range: 'A1',
+              values: values
+            }]
+          }),
+        });
+        if (!updateResponse.ok) {
+          const errorBody = await updateResponse.json();
+          console.error('Failed to add content to Google Sheet:', errorBody);
+        }
+      } catch (contentError) {
+        console.error('Failed to add content to Google Sheet:', contentError);
+      }
+    }
+    
     console.log('Successfully created Google Sheet:', file.id);
     return { url: file.webViewLink || `https://docs.google.com/spreadsheets/d/${file.id}/edit` };
   } catch (error) {
@@ -83,6 +132,47 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
           throw new Error(`Failed to create Google Slide: ${errorBody.error?.message || 'Unknown error'}`);
       }
       const file = await createResponse.json();
+      
+      // Add content to the presentation if provided
+      if (content) {
+        try {
+          // Get the presentation to find slide IDs
+          const getResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/presentations/${file.id}`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` },
+          });
+          
+          if (getResponse.ok) {
+            const presentation = await getResponse.json();
+            const slideId = presentation.slides?.[0]?.objectId;
+            
+            if (slideId) {
+              const updateResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/presentations/${file.id}:batchUpdate`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  requests: [
+                    {
+                      insertText: {
+                        objectId: slideId,
+                        text: `${content.title}\n\n${content.subtitle}`,
+                        insertionIndex: 0
+                      }
+                    }
+                  ]
+                }),
+              });
+              if (!updateResponse.ok) {
+                const errorBody = await updateResponse.json();
+                console.error('Failed to add content to Google Slide:', errorBody);
+              }
+            }
+          }
+        } catch (contentError) {
+          console.error('Failed to add content to Google Slide:', contentError);
+        }
+      }
+      
       console.log('Successfully created Google Slide:', file.id);
       return { url: file.webViewLink || `https://docs.google.com/presentation/d/${file.id}/edit` };
     } catch (error) {
