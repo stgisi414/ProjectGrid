@@ -92,15 +92,11 @@ export const createGoogleSheet = async (title: string, parentId: string, accessT
     // Add values to the sheet if provided
     if (values && values.length > 0) {
       try {
-        const updateResponse = await fetch(`${GOOGLE_SHEETS_API_BASE_URL}/${file.id}/values/A1:batchUpdate`, {
+        const updateResponse = await fetch(`${GOOGLE_SHEETS_API_BASE_URL}/${file.id}/values/A1:append?valueInputOption=RAW`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            valueInputOption: 'RAW',
-            data: [{
-              range: 'A1',
-              values: values
-            }]
+            values: values
           }),
         });
         if (!updateResponse.ok) {
@@ -147,15 +143,63 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
             const slideId = presentation.slides?.[0]?.objectId;
             
             if (slideId) {
+              // Create text boxes and add content
               const updateResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/presentations/${file.id}:batchUpdate`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   requests: [
                     {
+                      createShape: {
+                        objectId: 'title_box',
+                        shapeType: 'TEXT_BOX',
+                        elementProperties: {
+                          pageObjectId: slideId,
+                          size: {
+                            height: { magnitude: 100, unit: 'PT' },
+                            width: { magnitude: 400, unit: 'PT' }
+                          },
+                          transform: {
+                            scaleX: 1,
+                            scaleY: 1,
+                            translateX: 50,
+                            translateY: 50,
+                            unit: 'PT'
+                          }
+                        }
+                      }
+                    },
+                    {
                       insertText: {
-                        objectId: slideId,
-                        text: `${content.title}\n\n${content.subtitle}`,
+                        objectId: 'title_box',
+                        text: content.title,
+                        insertionIndex: 0
+                      }
+                    },
+                    {
+                      createShape: {
+                        objectId: 'subtitle_box',
+                        shapeType: 'TEXT_BOX',
+                        elementProperties: {
+                          pageObjectId: slideId,
+                          size: {
+                            height: { magnitude: 50, unit: 'PT' },
+                            width: { magnitude: 400, unit: 'PT' }
+                          },
+                          transform: {
+                            scaleX: 1,
+                            scaleY: 1,
+                            translateX: 50,
+                            translateY: 170,
+                            unit: 'PT'
+                          }
+                        }
+                      }
+                    },
+                    {
+                      insertText: {
+                        objectId: 'subtitle_box',
+                        text: content.subtitle,
                         insertionIndex: 0
                       }
                     }
