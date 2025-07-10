@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useState, useCallback, useEffect } from 'react';
 import { ProjectDetails, GeneratedAsset, AssetType, User } from './types';
@@ -111,29 +110,69 @@ const App: React.FC = () => {
       if (isSignedIn && accessToken) {
         const assets: GeneratedAsset[] = [];
 
-        const { folderId, folderUrl } = await createGoogleDriveFolder(details.projectName, accessToken);
-        if (!folderId) {
-          throw new Error("Failed to create project folder, cannot proceed.");
+        try {
+          const { folderId, folderUrl } = await createGoogleDriveFolder(details.projectName, accessToken);
+          assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: folderUrl });
+
+          const assetCreationPromises = [
+            createGoogleDoc('Project Plan & Timeline', folderId, accessToken, details.projectPlan)
+              .then(({ url }) => ({ type: AssetType.Docs, name: 'Project Plan & Timeline', icon: <GoogleDocsIcon />, url }))
+              .catch(error => {
+                console.error('Failed to create Project Plan:', error);
+                return { type: AssetType.Docs, name: 'Project Plan & Timeline', icon: <GoogleDocsIcon />, url: '#' };
+              }),
+
+            createGoogleDoc('Project Proposal', folderId, accessToken, details.projectProposal)
+              .then(({ url }) => ({ type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url }))
+              .catch(error => {
+                console.error('Failed to create Project Proposal:', error);
+                return { type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: '#' };
+              }),
+
+            createGoogleSheet('Budget Tracker', folderId, accessToken, details.budgetTracker)
+              .then(({ url }) => ({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url }))
+              .catch(error => {
+                console.error('Failed to create Budget Tracker:', error);
+                return { type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: '#' };
+              }),
+
+            createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck)
+              .then(({ url }) => ({ type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url }))
+              .catch(error => {
+                console.error('Failed to create Pitch Deck:', error);
+                return { type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: '#' };
+              }),
+
+            createGoogleDoc('Stakeholder Feedback Form', folderId, accessToken, details.feedbackForm)
+              .then(({ url }) => ({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url }))
+              .catch(error => {
+                console.error('Failed to create Feedback Form:', error);
+                return { type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' };
+              }),
+
+            createGoogleDoc('Project Checklist', folderId, accessToken, details.projectChecklist)
+              .then(({ url }) => ({ type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url }))
+              .catch(error => {
+                console.error('Failed to create Project Checklist:', error);
+                return { type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' };
+              })
+          ];
+
+          const createdAssets = await Promise.all(assetCreationPromises);
+          assets.push(...createdAssets);
+        } catch (error) {
+          console.error('Failed to create Google Drive folder:', error);
+          // Add placeholder assets if folder creation fails
+          assets.push(
+            { type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: '#' },
+            { type: AssetType.Docs, name: 'Project Plan & Timeline', icon: <GoogleDocsIcon />, url: '#' },
+            { type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: '#' },
+            { type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: '#' },
+            { type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: '#' },
+            { type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: '#' },
+            { type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: '#' }
+          );
         }
-        assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: folderUrl });
-
-        const { url: projectProposalUrl } = await createGoogleDoc('Project Proposal', folderId, accessToken, details.projectProposal);
-        assets.push({ type: AssetType.Docs, name: 'Project Proposal', icon: <GoogleDocsIcon />, url: projectProposalUrl });
-        
-        const { url: projectPlanUrl } = await createGoogleSheet('Project Plan & Timeline', folderId, accessToken, details.projectPlan);
-        assets.push({ type: AssetType.Sheets, name: 'Project Plan & Timeline', icon: <GoogleSheetsIcon />, url: projectPlanUrl });
-        
-        const { url: budgetTrackerUrl } = await createGoogleSheet('Budget Tracker', folderId, accessToken, details.budgetTracker);
-        assets.push({ type: AssetType.Sheets, name: 'Budget Tracker', icon: <GoogleSheetsIcon />, url: budgetTrackerUrl });
-
-        const { url: pitchDeckUrl } = await createGoogleSlide('Pitch Deck', folderId, accessToken, details.pitchDeck);
-        assets.push({ type: AssetType.Slides, name: 'Pitch Deck', icon: <GoogleSlidesIcon />, url: pitchDeckUrl });
-
-        const { url: feedbackFormUrl } = await createGoogleDoc('Stakeholder Feedback Form', folderId, accessToken, details.feedbackForm);
-        assets.push({ type: AssetType.Forms, name: 'Stakeholder Feedback Form', icon: <GoogleFormsIcon />, url: feedbackFormUrl });
-
-        const { url: checklistUrl } = await createGoogleDoc('Project Checklist', folderId, accessToken, details.projectChecklist);
-        assets.push({ type: AssetType.Keep, name: 'Project Checklist', icon: <GoogleKeepIcon />, url: checklistUrl });
 
         const today = new Date();
         const tomorrow = new Date(today);
@@ -149,7 +188,7 @@ const App: React.FC = () => {
           accessToken
         );
         assets.push({ type: AssetType.Calendar, name: `${details.kickoffMeetingTitle} on ${kickoffDate}`, icon: <GoogleCalendarIcon />, url: kickoffEventUrl });
-        
+
         setGeneratedAssets(assets);
       }
     } catch (e) {
