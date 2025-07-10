@@ -115,7 +115,9 @@ const App: React.FC = () => {
           assets.push({ type: AssetType.Drive, name: `${details.projectName} - Project Folder`, icon: <GoogleDriveIcon />, url: folderUrl });
 
           const assetCreationPromises = [
-            createGoogleDoc('Project Plan & Timeline', folderId, accessToken, details.projectPlan)
+            createGoogleDoc('Project Plan & Timeline', folderId, accessToken, 
+              typeof details.projectPlan === 'string' ? details.projectPlan : 
+              details.projectPlan.map(row => row.join(' | ')).join('\n'))
               .then(({ url }) => ({ type: AssetType.Docs, name: 'Project Plan & Timeline', icon: <GoogleDocsIcon />, url }))
               .catch(error => {
                 console.error('Failed to create Project Plan:', error);

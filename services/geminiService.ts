@@ -30,27 +30,33 @@ export const generateProjectDetails = async (description: string): Promise<Proje
   }
 
   const prompt = `
-    You are a world-class business consultant and project manager. Based on the following project description, generate a comprehensive set of branded documents.
+    You are a world-class business consultant, project manager, and brand strategist with expertise in creating comprehensive, professional business documents. Based on the following project description, generate a complete set of branded, detailed documents that would impress investors, stakeholders, and team members.
+
+    CRITICAL: Include proper branding throughout ALL content. Add the project logo placeholder "[PROJECT_LOGO]" and company branding elements where appropriate in all documents.
+
     Provide your response as a single, minified JSON object with no markdown.
-    The JSON object MUST have these keys, with detailed, well-structured content for each:
-    - "projectName": A short, catchy name for the project.
-    - "projectObjective": A one-sentence summary of the project's goal.
-    - "brandIdentity": A brief description of the brand's personality and values.
-    - "colorTheme": A hex code for a primary color that fits the project's theme.
-    - "kickoffMeetingTitle": A title for a calendar event for the project kick-off.
-    - "projectProposal": A 3-paragraph project proposal including an introduction, a "Scope of Work" section, and a "Timeline" section.
-    - "projectPlan": A 2D array of strings for a project plan with columns: "Task", "Start Date", "End Date", "Owner", and at least 5 tasks.
-    - "budgetTracker": A 2D array of strings for a budget with columns: "Item", "Category", "Cost", and at least 5 budget items.
-    - "pitchDeck": A JSON object with content for a 6-slide pitch deck. It must have keys: "title", "subtitle", "problem": {"title", "content"}, "solution": {"title", "content"}, "targetMarket": {"title", "content"}, "team": {"title", "content"}.
-    - "feedbackForm": A string containing at least 3 open-ended questions for a stakeholder feedback form.
-    - "projectChecklist": A string containing a numbered list of at least 5 key tasks for a project checklist.
+    The JSON object MUST have these keys with rich, detailed, professional content:
+
+    - "projectName": A memorable, brandable company/project name (2-4 words max)
+    - "projectObjective": A compelling one-sentence mission statement that captures the essence and impact
+    - "brandIdentity": A comprehensive brand personality description including values, tone, target audience, and positioning (4-6 sentences)
+    - "colorTheme": A hex code that perfectly represents the brand and industry
+    - "kickoffMeetingTitle": An engaging, professional meeting title that builds excitement
+    - "projectProposal": A comprehensive 6-paragraph proposal with: Executive Summary, Problem Statement, Proposed Solution, Scope of Work, Timeline & Milestones, and Expected Outcomes. Include [PROJECT_LOGO] at the top.
+    - "projectPlan": A detailed 2D array with columns ["Phase/Task", "Start Date", "End Date", "Owner", "Priority", "Status"] and at least 12 comprehensive tasks covering all project phases
+    - "budgetTracker": A detailed 2D array with columns ["Category", "Item", "Estimated Cost", "Actual Cost", "Variance", "Notes"] and at least 10 realistic budget items
+    - "pitchDeck": A comprehensive pitch deck object with: "title", "subtitle", "brandingStatement" (include [PROJECT_LOGO]), "problem": {"title", "content" (3-4 sentences)}, "solution": {"title", "content" (3-4 sentences)}, "marketOpportunity": {"title", "content" (market size, trends)}, "businessModel": {"title", "content" (revenue streams)}, "targetMarket": {"title", "content" (detailed customer segments)}, "competitiveAdvantage": {"title", "content"}, "team": {"title", "content" (key roles needed)}, "financialProjections": {"title", "content"}, "fundingRequest": {"title", "content"}, "nextSteps": {"title", "content"}
+    - "feedbackForm": A comprehensive feedback form with introduction text (include [PROJECT_LOGO]), at least 8 detailed questions covering all aspects: overall satisfaction, specific features, usability, value proposition, recommendations, areas for improvement, likelihood to recommend, and additional comments
+    - "projectChecklist": A detailed checklist with [PROJECT_LOGO] header and at least 15 actionable items organized by phases: Planning (5 items), Development (5 items), Testing (3 items), Launch (2 items)
+
+    Make everything professional, detailed, and industry-appropriate. Use realistic dates, costs, and technical details.
 
     Project Description: "${description}"
   `;
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-2.0-flash-exp",
       contents: prompt,
       generationConfig: {
         responseMimeType: "application/json",
@@ -120,7 +126,7 @@ export const generateProjectIdeas = async (): Promise<Array<{title: string, desc
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash-latest",
+      model: "gemini-2.0-flash-exp",
       contents: prompt,
       generationConfig: {
         responseMimeType: "application/json",
@@ -176,7 +182,7 @@ export const generateLogo = async (projectName: string, projectObjective: string
 
     try {
         const response = await ai.models.generateImages({
-            model: 'imagen-3.0-generate-002',
+            model: 'imagen-3.0-generate-001',
             prompt: prompt,
             config: { numberOfImages: 1, outputMimeType: 'image/jpeg' },
             safetySettings: [

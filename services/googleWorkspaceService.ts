@@ -45,17 +45,51 @@ export const createGoogleDoc = async (title: string, parentId: string, accessTok
     // Add content to the document if provided
     if (content) {
       try {
+        // Process content to replace [PROJECT_LOGO] placeholder and format properly
+        const formattedContent = content.replace(/\[PROJECT_LOGO\]/g, '🏢 PROJECT LOGO PLACEHOLDER 🏢');
+        
+        const requests = [
+          {
+            insertText: {
+              location: { index: 1 },
+              text: formattedContent
+            }
+          }
+        ];
+
+        // Add formatting for headers and structure
+        const lines = formattedContent.split('\n');
+        let currentIndex = 1;
+        
+        lines.forEach((line, i) => {
+          if (line.includes('🏢 PROJECT LOGO PLACEHOLDER 🏢') || 
+              line.includes('Executive Summary') || 
+              line.includes('Problem Statement') ||
+              line.includes('Proposed Solution') ||
+              line.includes('Scope of Work') ||
+              line.includes('Timeline & Milestones') ||
+              line.includes('Expected Outcomes')) {
+            requests.push({
+              updateTextStyle: {
+                range: {
+                  startIndex: currentIndex,
+                  endIndex: currentIndex + line.length
+                },
+                textStyle: {
+                  bold: true,
+                  fontSize: { magnitude: 14, unit: 'PT' }
+                },
+                fields: 'bold,fontSize'
+              }
+            });
+          }
+          currentIndex += line.length + 1; // +1 for newline
+        });
+
         const updateResponse = await fetch(`https://docs.googleapis.com/v1/documents/${file.id}:batchUpdate`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            requests: [{
-              insertText: {
-                location: { index: 1 },
-                text: content
-              }
-            }]
-          }),
+          body: JSON.stringify({ requests }),
         });
         if (!updateResponse.ok) {
           const errorBody = await updateResponse.json();
@@ -140,72 +174,116 @@ export const createGoogleSlide = async (title: string, parentId: string, accessT
           
           if (getResponse.ok) {
             const presentation = await getResponse.json();
-            const slideId = presentation.slides?.[0]?.objectId;
+            let slideId = presentation.slides?.[0]?.objectId;
             
             if (slideId) {
-              // Create text boxes and add content
+              const requests = [];
+              
+              // Clear existing content
+              requests.push({
+                deleteObject: {
+                  objectId: presentation.slides[0].pageElements?.[0]?.objectId
+                }
+              });
+
+              // Create comprehensive slide deck
+              const slides = [
+                { title: content.title, subtitle: content.subtitle, branding: content.brandingStatement || '🏢 Company Logo' },
+                { title: content.problem?.title || 'Problem', content: content.problem?.content || 'Problem description' },
+                { title: content.solution?.title || 'Solution', content: content.solution?.content || 'Solution description' },
+                { title: content.marketOpportunity?.title || 'Market Opportunity', content: content.marketOpportunity?.content || 'Market details' },
+                { title: content.businessModel?.title || 'Business Model', content: content.businessModel?.content || 'Revenue model' },
+                { title: content.targetMarket?.title || 'Target Market', content: content.targetMarket?.content || 'Customer segments' },
+                { title: content.competitiveAdvantage?.title || 'Competitive Advantage', content: content.competitiveAdvantage?.content || 'Our advantages' },
+                { title: content.team?.title || 'Team', content: content.team?.content || 'Team overview' },
+                { title: content.financialProjections?.title || 'Financial Projections', content: content.financialProjections?.content || 'Revenue projections' },
+                { title: content.fundingRequest?.title || 'Funding Request', content: content.fundingRequest?.content || 'Investment needed' },
+                { title: content.nextSteps?.title || 'Next Steps', content: content.nextSteps?.content || 'Action items' }
+              ];
+
+              // Create additional slides
+              for (let i = 1; i < slides.length; i++) {
+                requests.push({
+                  createSlide: {
+                    objectId: `slide_${i}`,
+                    slideLayoutReference: {
+                      predefinedLayout: 'TITLE_AND_BODY'
+                    }
+                  }
+                });
+              }
+
+              // Add content to slides
+              slides.forEach((slide, index) => {
+                const currentSlideId = index === 0 ? slideId : `slide_${index}`;
+                
+                requests.push({
+                  createShape: {
+                    objectId: `title_${index}`,
+                    shapeType: 'TEXT_BOX',
+                    elementProperties: {
+                      pageObjectId: currentSlideId,
+                      size: {
+                        height: { magnitude: 80, unit: 'PT' },
+                        width: { magnitude: 600, unit: 'PT' }
+                      },
+                      transform: {
+                        scaleX: 1,
+                        scaleY: 1,
+                        translateX: 50,
+                        translateY: 50,
+                        unit: 'PT'
+                      }
+                    }
+                  }
+                });
+
+                requests.push({
+                  insertText: {
+                    objectId: `title_${index}`,
+                    text: slide.title,
+                    insertionIndex: 0
+                  }
+                });
+
+                if (slide.subtitle || slide.content) {
+                  requests.push({
+                    createShape: {
+                      objectId: `content_${index}`,
+                      shapeType: 'TEXT_BOX',
+                      elementProperties: {
+                        pageObjectId: currentSlideId,
+                        size: {
+                          height: { magnitude: 300, unit: 'PT' },
+                          width: { magnitude: 600, unit: 'PT' }
+                        },
+                        transform: {
+                          scaleX: 1,
+                          scaleY: 1,
+                          translateX: 50,
+                          translateY: 150,
+                          unit: 'PT'
+                        }
+                      }
+                    }
+                  });
+
+                  requests.push({
+                    insertText: {
+                      objectId: `content_${index}`,
+                      text: slide.subtitle || slide.content || '',
+                      insertionIndex: 0
+                    }
+                  });
+                }
+              });
+
               const updateResponse = await fetch(`${GOOGLE_SLIDES_API_BASE_URL}/presentations/${file.id}:batchUpdate`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  requests: [
-                    {
-                      createShape: {
-                        objectId: 'title_box',
-                        shapeType: 'TEXT_BOX',
-                        elementProperties: {
-                          pageObjectId: slideId,
-                          size: {
-                            height: { magnitude: 100, unit: 'PT' },
-                            width: { magnitude: 400, unit: 'PT' }
-                          },
-                          transform: {
-                            scaleX: 1,
-                            scaleY: 1,
-                            translateX: 50,
-                            translateY: 50,
-                            unit: 'PT'
-                          }
-                        }
-                      }
-                    },
-                    {
-                      insertText: {
-                        objectId: 'title_box',
-                        text: content.title,
-                        insertionIndex: 0
-                      }
-                    },
-                    {
-                      createShape: {
-                        objectId: 'subtitle_box',
-                        shapeType: 'TEXT_BOX',
-                        elementProperties: {
-                          pageObjectId: slideId,
-                          size: {
-                            height: { magnitude: 50, unit: 'PT' },
-                            width: { magnitude: 400, unit: 'PT' }
-                          },
-                          transform: {
-                            scaleX: 1,
-                            scaleY: 1,
-                            translateX: 50,
-                            translateY: 170,
-                            unit: 'PT'
-                          }
-                        }
-                      }
-                    },
-                    {
-                      insertText: {
-                        objectId: 'subtitle_box',
-                        text: content.subtitle,
-                        insertionIndex: 0
-                      }
-                    }
-                  ]
-                }),
+                body: JSON.stringify({ requests }),
               });
+              
               if (!updateResponse.ok) {
                 const errorBody = await updateResponse.json();
                 console.error('Failed to add content to Google Slide:', errorBody);
