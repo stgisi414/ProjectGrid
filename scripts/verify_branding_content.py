@@ -28,7 +28,7 @@ def generate_project_details(description):
     print("Generating project details with Gemini...")
     try:
         # Corrected model name and added safety settings
-        model = genai.GenerativeModel('gemini-1.5-flash-latest') 
+        model = genai.GenerativeModel('gemini-2.0-flash') 
         response = model.generate_content(
             f"""
             You are a project management and branding assistant. Based on the following project description, extract key details.

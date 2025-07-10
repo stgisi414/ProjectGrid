@@ -56,7 +56,7 @@ export const generateProjectDetails = async (description: string): Promise<Proje
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash",
       contents: prompt,
       generationConfig: {
         responseMimeType: "application/json",
@@ -126,7 +126,7 @@ export const generateProjectIdeas = async (): Promise<Array<{title: string, desc
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-2.5-flash",
       contents: prompt,
       generationConfig: {
         responseMimeType: "application/json",
