@@ -1,0 +1,53 @@
+Creating Google Drive folder: ChainFi
+index-Jxirkdil.js:1594 Successfully created folder: 1NIOlyTMTllDJ4N-708wE6Q-YZrT2mLEF
+index-Jxirkdil.js:1594 Creating Google Doc: Project Plan & Timeline
+index-Jxirkdil.js:1594 Creating Google Doc: Project Proposal
+index-Jxirkdil.js:1594 Creating Google Sheet: Budget Tracker
+index-Jxirkdil.js:1594 Creating Google Doc: Stakeholder Feedback Form
+index-Jxirkdil.js:1594 Creating Google Doc: Project Checklist
+index-Jxirkdil.js:1594  POST https://docs.googleapis.com/v1/documents/105TRZ-nnGuGQNKKu3KkG6frl1dy0uPROXYUOF6iaYxg:batchUpdate 400 (Bad Request)
+ks @ index-Jxirkdil.js:1594
+await in ks
+(anonymous) @ index-Jxirkdil.js:1617
+await in (anonymous)
+nm @ index-Jxirkdil.js:48
+(anonymous) @ index-Jxirkdil.js:48
+cd @ index-Jxirkdil.js:48
+cc @ index-Jxirkdil.js:48
+Ec @ index-Jxirkdil.js:49
+D0 @ index-Jxirkdil.js:49Understand this error
+index-Jxirkdil.js:1594 Failed to add content to Google Doc
+ks @ index-Jxirkdil.js:1594
+await in ks
+(anonymous) @ index-Jxirkdil.js:1617
+await in (anonymous)
+nm @ index-Jxirkdil.js:48
+(anonymous) @ index-Jxirkdil.js:48
+cd @ index-Jxirkdil.js:48
+cc @ index-Jxirkdil.js:48
+Ec @ index-Jxirkdil.js:49
+D0 @ index-Jxirkdil.js:49Understand this error
+index-Jxirkdil.js:1594 Successfully created Google Doc: 105TRZ-nnGuGQNKKu3KkG6frl1dy0uPROXYUOF6iaYxg
+index-Jxirkdil.js:1594 Successfully created Google Doc: 1w2a6ofe_bYp9riTV6U5wCuaMZqmt2NZHhaWAiqkM3uA
+index-Jxirkdil.js:1594 Successfully created Google Sheet: 17mFHzjhBx2qz1sW8vYopjD-Pk2TgrU224S6vKxfSFtI
+index-Jxirkdil.js:1594 Successfully created Google Doc: 1bjdjkw1VSO1K7GLrjULf5zXqO1g6dhWMGdYIAZeSaMA
+index-Jxirkdil.js:1594 Successfully created Google Doc: 175hc7He65eAHKeDrK2FGKcK9ppy9rKw68vfUugPPgjA
+index-Jxirkdil.js:1596  POST https://slides.googleapis.com/v1/presentations/11TXHKCOFD-ih2g88ebmZ1pQffvoHtpMU3PLqwTb6oeA:batchUpdate 400 (Bad Request)
+Ok @ index-Jxirkdil.js:1596
+await in Ok
+(anonymous) @ index-Jxirkdil.js:1617
+await in (anonymous)
+nm @ index-Jxirkdil.js:48
+(anonymous) @ index-Jxirkdil.js:48
+cd @ index-Jxirkdil.js:48
+cc @ index-Jxirkdil.js:48
+Ec @ index-Jxirkdil.js:49
+D0 @ index-Jxirkdil.js:49Understand this error
+index-Jxirkdil.js:1617 Asset not clickable: ChainFi - Project Folder undefined
+index-Jxirkdil.js:1617 Asset not clickable: Project Plan & Timeline undefined
+index-Jxirkdil.js:1617 Asset not clickable: Project Proposal undefined
+index-Jxirkdil.js:1617 Asset not clickable: Budget Tracker undefined
+index-Jxirkdil.js:1617 Asset not clickable: Pitch Deck undefined
+index-Jxirkdil.js:1617 Asset not clickable: Stakeholder Feedback Form undefined
+index-Jxirkdil.js:1617 Asset not clickable: Project Checklist undefined
+index-Jxirkdil.js:1617 Opening URL: https://www.google.com/calendar/event?eid=bW5tMHRuNDVlNGZjZWhpZGt2azlucTllOTAgc3RlZmRnaXNpQG0
