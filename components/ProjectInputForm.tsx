@@ -1,6 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LogoIcon } from './icons/LogoIcon';
+import { ProjectIdeasMenu } from './ProjectIdeasMenu';
 
 interface ProjectInputFormProps {
   projectDescription: string;
@@ -25,10 +26,17 @@ export const ProjectInputForm: React.FC<ProjectInputFormProps> = ({
   isAuthAvailable,
   onSignIn,
 }) => {
+  const [showIdeas, setShowIdeas] = useState(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setLogoFile(e.target.files[0]);
     }
+  };
+
+  const handleSelectIdea = (idea: string) => {
+    setProjectDescription(idea);
+    setShowIdeas(false);
   };
 
   return (
@@ -45,7 +53,19 @@ export const ProjectInputForm: React.FC<ProjectInputFormProps> = ({
           value={projectDescription}
           onChange={(e) => setProjectDescription(e.target.value)}
         />
+        <button
+          type="button"
+          onClick={() => setShowIdeas(!showIdeas)}
+          className="mt-2 flex items-center text-sm text-purple-400 hover:text-purple-300 transition-colors"
+        >
+          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+          </svg>
+          {showIdeas ? 'Hide' : 'Show'} Project Ideas
+        </button>
       </div>
+
+      <ProjectIdeasMenu isVisible={showIdeas} onSelectIdea={handleSelectIdea} />
 
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <label htmlFor="logo-upload" className="w-full sm:w-auto flex items-center justify-center px-6 py-3 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-gray-500 hover:bg-gray-700/50 transition-colors">
